@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  <h1 id="status">Burp测试</h1>
+  <textarea rows="30" cols="50" id="portnums">本地源端口:&#13;</textarea>
+  <button onclick="Test();">RunTest</button>
+    <script>
+
+
+    function makeRequest() 
+    {
+      return new Promise(function (resolve, reject) 
+      {
+        let xhr = new XMLHttpRequest();
+        url="./getport"
+        xhr.open('GET', url);
+        xhr.onload = function () {
+            if(xhr.readyState === 4 && xhr.status === 200)
+            {
+                resolve(xhr.responseText)
+            }
+        }
+        xhr.send();
+    });
+    }
+
+
+
+
+    async function Test()
+    {
+      status_obj=document.getElementById('status')
+      
+      status_obj.innerHTML='测试中...'
+      output=document.getElementById('portnums')
+      source_ports={}
+      for(var i=0;i<20;i++)
+      {
+        portnum=await makeRequest()
+        if(source_ports[portnum])
+            source_ports[portnum]++
+        else 
+            source_ports[portnum]=1
+        output=document.getElementById('portnums')
+        output.value+=portnum+"\n"
+      }
+      output.value+=JSON.stringify(source_ports)
+      if(Object.keys(source_ports).length>=2)
+      {
+        status_obj.innerHTML='测试结果：有Burp之类的代理！'
+        status_obj.style.color='red'
+      }
+      else 
+      {
+        status_obj.style.color='green'
+        status_obj.innerHTML='测试结果：无代理！'
+      }
+    }
+    
+    </script>
+</body>
+</html>
